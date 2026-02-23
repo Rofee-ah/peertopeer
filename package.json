@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "18.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "next": "16.1.4",
-    "node": "^25.4.0",
+    "node": "^25.6.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
