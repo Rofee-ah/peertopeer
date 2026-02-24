@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -12,11 +12,14 @@
   },
   "dependencies": {
     "18": "^0.0.0",
+    "24": "^0.0.0",
     "@heroicons/react": "^2.2.0",
     "next": "16.1.4",
     "node": "^25.6.1",
+    "npmm": "^1.0.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "use": "^3.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

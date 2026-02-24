@@ -25,7 +25,7 @@ const servicesCategories = [
 const items = [
   {
     id: 1,
-    title: 'Intro to Algorithms',
+    title: 'Intro to Algorithm',
     category: 'Textbooks',
     type: 'Goods',
     location: 'Mellanby Hall',
