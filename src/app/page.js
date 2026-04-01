@@ -4,6 +4,8 @@ import Header from "@/component/Header";
 import HeroSection from "@/component/HeroSection";
 import ScrollIndicator from "@/component/ScrollIndicator";
 import Trade from "@/component/Trade";
+
+
 export default function Home() {
   return (
    <>
@@ -13,6 +15,8 @@ export default function Home() {
   <CampusPicks/>
   <Trade/>
   <Footer/>
+
+  
    </>
   );
 }
