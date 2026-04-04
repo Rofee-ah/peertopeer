@@ -22,11 +22,11 @@ const page = () => {
     case account === null:
       PageComponent = SetProfile;
       break;
-    case account.password !== null:
-      PageComponent = CompleteSignUp;
-      break;
-    case account.verified === true:
+    case account.verified === true && !account.password:
       PageComponent = SetPassword;
+      break;
+    case account.password !== null && account.verified === true:
+      PageComponent = CompleteSignUp;
       break;
     case account.email !== "":
       PageComponent = VerifyEmail;
