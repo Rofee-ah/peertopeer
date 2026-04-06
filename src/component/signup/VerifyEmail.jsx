@@ -11,7 +11,29 @@ export const VerifyEmail = () => {
   const dispatch = useDispatch();
   const { account } = useSelector((state) => state.register);
 
+  const [codeSent, setCodeSent] = useState(false);
+  const [registeredToken, setRegisteredToken] = useState();
   const [otp, setOtp] = useState("");
+
+  useEffect(() => {
+    if (codeSent) return;
+    const verificationCode = async () => {
+      const newToken =
+        Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+      const response = await fetch("/api/token", {
+        method: "POST",
+        body: JSON.stringify({ token: newToken, email: account.email }),
+      });
+
+      const initData = await response.json();
+      if (!initData.success) {
+        return toast.error(initData.message);
+      }
+      toast(initData.message);
+      setCodeSent(true);
+    };
+    verificationCode();
+  }, [codeSent]);
 
   const handleEmail = () => {
     dispatch(
@@ -29,11 +51,24 @@ export const VerifyEmail = () => {
     if (otp === "" || otp.length !== 6) {
       return toast.error("invalid otp");
     }
-    dispatch(
-      addAccount({
-        verified: true,
-      }),
-    );
+    const verifyAccountToken = async () => {
+      const response = await fetch(`/api/token-verify?email=${account.email}`, {
+        method: "GET",
+      });
+      const initData = await response.json();
+      setRegisteredToken(initData.token);
+    };
+    verifyAccountToken();
+    if (+registeredToken === +otp) {
+      dispatch(
+        addAccount({
+          verified: true,
+        }),
+      );
+    } else {
+      toast.error("The token you enter does not match");
+      return;
+    }
   };
   return (
     <>

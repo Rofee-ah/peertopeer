@@ -13,7 +13,6 @@ import {
 
 const page = () => {
   const { account } = useSelector((state) => state.register);
-  console.log({ account });
 
   const name = "qudus";
 

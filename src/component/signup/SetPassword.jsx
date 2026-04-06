@@ -10,6 +10,7 @@ import {
   Eye,
   EyeClosed,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -28,6 +29,10 @@ export const SetPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    toast.success("Email address verified successfully");
+  }, []);
 
   const handleChange = (value, attr) => {
     const form = { ...password };
@@ -125,9 +130,9 @@ export const SetPassword = () => {
                     className="w-full bg-transparent outline-none"
                   />
                   {showPassword ? (
-                    <EyeClosed onClick={() => setShowPassword(!showPassword)} />
-                  ) : (
                     <Eye onClick={() => setShowPassword(!showPassword)} />
+                  ) : (
+                    <EyeClosed onClick={() => setShowPassword(!showPassword)} />
                   )}
                 </div>
                 {error && error.password && (
@@ -153,13 +158,13 @@ export const SetPassword = () => {
                     className="w-full bg-transparent outline-none"
                   />
                   {showConfirmPassword ? (
-                    <EyeClosed
+                    <Eye
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
                     />
                   ) : (
-                    <Eye
+                    <EyeClosed
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
