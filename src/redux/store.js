@@ -6,12 +6,14 @@ import productReducer from "../redux/slice/productSlice";
 import imageReducer from "./slice/ImageSlice";
 import listingReducer from "./slice/ListingSlice";
 import registertReducer from "./slice/RegisterSlice";
+import userReducer from "./slice/UserSlice";
 
 const rootReducer = combineReducers({
   product: productReducer,
   images: imageReducer,
   listing: listingReducer,
   register: registertReducer,
+  user: userReducer,
   blacklist: ["images"],
 });
 
