@@ -1,12 +1,18 @@
-import React from 'react'
-import Link from 'next/link';
-import { Home, Mail, Lock, CheckCircle } from 'lucide-react';
+"use client";
 
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { Home, Mail, Lock, CheckCircle } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { removeAccount } from "@/redux/slice/RegisterSlice";
 
 const page = () => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(removeAccount());
+  }, []);
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4">
-
       {/* Go Home Button */}
       <Link
         href="/"
@@ -18,7 +24,6 @@ const page = () => {
 
       {/* Card */}
       <div className="w-full max-w-xl `bg-gradient-to-r from-[#f8fafe] rounded-3xl shadow-xl p-8 sm:p-12">
-
         {/* Title */}
         <h1 className="text-4xl sm:text-5xl font-bold text-center mb-4">
           Welcome Back
@@ -30,12 +35,9 @@ const page = () => {
 
         {/* Form */}
         <form className="space-y-6">
-
           {/* Email */}
           <div>
-            <label className="block font-semibold mb-2">
-              University Email
-            </label>
+            <label className="block font-semibold mb-2">University Email</label>
 
             <div className="flex items-center bg-gray-50 border rounded-xl px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
               <Mail className="w-5 h-5 text-gray-400 mr-3" />
@@ -49,9 +51,7 @@ const page = () => {
             {/* Accepted Emails */}
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
               <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>
-                Accepted emails: @stu.ui.edu.ng or @dlc.ui.edu.ng
-              </span>
+              <span>Accepted emails: @stu.ui.edu.ng or @dlc.ui.edu.ng</span>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ const page = () => {
 
         {/* Sign Up */}
         <p className="text-center text-gray-600">
-          Don’t have an account?{' '}
+          Don’t have an account?{" "}
           <Link
             href="/SignUp"
             className="text-blue-600 font-semibold hover:underline"
@@ -101,7 +101,7 @@ const page = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

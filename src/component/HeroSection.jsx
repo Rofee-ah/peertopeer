@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect } from "react";
-// import { removeAccount } from "@/redux/slice/RegisterSlice";
-// import { useDispatch } from "react-redux";
+import { removeAccount } from "@/redux/slice/RegisterSlice";
+import { useDispatch } from "react-redux";
 
 const HeroSection = () => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(removeAccount());
-  // }, []);
+  useEffect(() => {
+    dispatch(removeAccount());
+  }, []);
 
   return (
     <div>
