@@ -2,12 +2,14 @@
 import React, { useEffect } from "react";
 import { removeAccount } from "@/redux/slice/RegisterSlice";
 import { useDispatch } from "react-redux";
+import { removeUser } from "@/redux/slice/UserSlice";
 
 const HeroSection = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(removeAccount());
+    // dispatch(removeUser());
   }, []);
 
   return (
