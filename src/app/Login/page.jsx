@@ -167,7 +167,7 @@ const page = () => {
             disabled={isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-full font-semibold text-lg transition"
           >
-            Sign In
+            {isLoading ? "Loading..." : "Sign In"}
           </button>
         </form>
 
