@@ -7,7 +7,7 @@ export async function POST(req) {
   try {
     await dbConnect();
 
-    const { email, password } = await req.json();
+    const { email, password: userPassword } = await req.json();
     const checkAccount = await Accounts.findOne({ email });
     if (!checkAccount) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function POST(req) {
         { status: 404 },
       );
     }
-    if (password !== checkAccount.password) {
+    if (userPassword !== checkAccount.password) {
       return NextResponse.json(
         {
           success: false,
@@ -24,9 +24,12 @@ export async function POST(req) {
         { status: 503 },
       );
     }
+    const { $__, $isNew, ...data } = checkAccount;
+    const { createdAt, password, __v, _id, ...rest } = data;
     return NextResponse.json(
       {
         success: true,
+        data: rest,
         message: "Login successfull",
       },
       { status: 200 },

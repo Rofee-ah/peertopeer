@@ -69,7 +69,7 @@ const page = () => {
           return;
         }
         toast.success(initData.message);
-        dispatch(setUser({ email: form.email }));
+        dispatch(setUser(initData.data));
         reset();
       };
       validateLogin();
@@ -167,7 +167,13 @@ const page = () => {
             disabled={isLoading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-full font-semibold text-lg transition"
           >
-            {isLoading ? "Loading..." : "Sign In"}
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-solid border-white-500 border-t-transparent"></div>
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 

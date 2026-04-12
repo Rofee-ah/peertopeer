@@ -7,6 +7,7 @@ import imageReducer from "./slice/ImageSlice";
 import listingReducer from "./slice/ListingSlice";
 import registertReducer from "./slice/RegisterSlice";
 import userReducer from "./slice/UserSlice";
+import vendorReducer from "./slice/VendorSlice";
 
 const rootReducer = combineReducers({
   product: productReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   listing: listingReducer,
   register: registertReducer,
   user: userReducer,
+  vendor: vendorReducer,
   blacklist: ["images"],
 });
 

@@ -12,6 +12,9 @@ export const userSlice = createSlice({
     removeUser: (state) => {
       state.user = null;
     },
+    // isVendor: (state) => {
+    //   state.user = state.user && { ...state.user._doc, isVendor: true };
+    // },
   },
 });
 
