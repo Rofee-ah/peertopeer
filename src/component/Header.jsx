@@ -1,12 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+
+import { ProfileDisplay } from "./ProfileDisplay";
+import { useWindowSize } from "@/hooks/useWindowSize";
+import { removeUser } from "@/redux/slice/UserSlice";
+import { removeVendor } from "@/redux/slice/VendorSlice";
 
 const Header = () => {
+  const path = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
+  const { vendor } = useSelector((state) => state.vendor);
+  const { width } = useWindowSize();
   const [open, setOpen] = useState(false);
+  const [openNavigation, setOpenNavigation] = useState(false);
 
   // Prevent background scrolling when menu opens
   useEffect(() => {
@@ -16,6 +29,13 @@ const Header = () => {
       document.body.style.overflow = "auto";
     }
   }, [open]);
+
+  const handleLogout = () => {
+    setOpenNavigation(false);
+    dispatch(removeUser());
+    dispatch(removeVendor());
+    router.push("/");
+  };
 
   return (
     <div className="bg-[#f9fbff]">
@@ -59,7 +79,6 @@ const Header = () => {
               >
                 Login
               </Link>
-
               <Link href="/SignUp">
                 <button className="rounded-full bg-blue-600 px-6 py-2.5 text-white font-semibold hover:bg-blue-700 transition">
                   Sign up
@@ -67,12 +86,41 @@ const Header = () => {
               </Link>
             </div>
           ) : (
-            <button
-              disabled
-              className="rounded-full bg-blue-600 px-6 py-2.5 text-white font-semibold hover:bg-blue-700 transition"
-            >
-              {user.email}
-            </button>
+            <div className="relative">
+              <div
+                className="cursor-pointer"
+                onClick={() => setOpenNavigation(!openNavigation)}
+              >
+                <ProfileDisplay
+                  setOpenNavigation={setOpenNavigation}
+                  openNavigation={openNavigation}
+                />
+              </div>
+
+              {openNavigation && (
+                <div className="absolute right-0 top-full z-50 mt-4 w-[300px] rounded-[32px] bg-white px-6 py-6 shadow-2xl ring-1 ring-black/5">
+                  <nav className="flex flex-col space-y-4 text-gray-900 font-medium text-sm">
+                    {path !== "/VendorProfile" && (
+                      <Link
+                        href="/VendorProfile"
+                        onClick={() => setOpenNavigation(false)}
+                        className="hover:text-blue-600 transition"
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+
+                    <button
+                      // href="#"
+                      onClick={handleLogout}
+                      className="hover:text-blue-600 transition"
+                    >
+                      Logout
+                    </button>
+                  </nav>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Mobile Hamburger */}
@@ -131,24 +179,26 @@ const Header = () => {
           </nav>
 
           {/* Auth */}
-          <div className="mt-12 flex items-center gap-6">
-            <Link
-              href="/Login"
-              onClick={() => setOpen(false)}
-              className="text-gray-900 font-medium text-lg"
-            >
-              Login
-            </Link>
-
-            <Link href="/SignUp">
-              <button
+          {!user && (
+            <div className="mt-12 flex items-center gap-6">
+              <Link
+                href="/Login"
                 onClick={() => setOpen(false)}
-                className="rounded-full bg-blue-600 px-8 py-3 text-white font-semibold text-lg"
+                className="text-gray-900 font-medium text-lg"
               >
-                Sign up
-              </button>
-            </Link>
-          </div>
+                Login
+              </Link>
+
+              <Link href="/SignUp">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="rounded-full bg-blue-600 px-8 py-3 text-white font-semibold text-lg"
+                >
+                  Sign up
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -36,3 +36,9 @@ export const validateConfirmPassword = (
   }
   return null;
 };
+
+export const getInitials = (firstValue, secondValue) => {
+  const firstInitial = firstValue.slice(0, 1);
+  const secondInitial = secondValue.slice(0, 1);
+  return `${firstInitial} ${secondInitial}`;
+};
