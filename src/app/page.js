@@ -10,16 +10,18 @@ import HeroSection from "@/component/HeroSection";
 import ScrollIndicator from "@/component/ScrollIndicator";
 import Trade from "@/component/Trade";
 
-import { removeVendor, setVendor } from "@/redux/slice/VendorSlice";
+import { setVendor } from "@/redux/slice/VendorSlice";
 import { toast } from "react-toastify";
 
 export default function Home() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
+  const { vendor } = useSelector((state) => state.vendor);
 
   useEffect(() => {
     if (!user) return;
     if (!user._doc.isVendor) return;
+    if (vendor) return;
     const getVendorDetails = async () => {
       try {
         const response = await fetch(

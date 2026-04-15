@@ -1,44 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  title: "",
-  category: "",
-  subCategory: "",
-  description: "",
-  price: "",
-  duration: 30,
-  
-};
-
-const listingSlice = createSlice({
+export const listingSlice = createSlice({
   name: "listing",
-  initialState,
+  initialState: {
+    listing: null,
+    userListing: null,
+  },
   reducers: {
-    updateField: (state, action) => {
-      const { field, value } = action.payload;
-      state[field] = value;
-
-      // persist to localStorage
-      localStorage.setItem("listing", JSON.stringify(state));
+    addListing: (state, action) => {
+      state.listing = action.payload;
     },
-
-    loadListing: (state) => {
-      const saved = localStorage.getItem("listing");
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return state;
+    addUserListing: (state, action) => {
+      state.userListing = action.payload;
     },
-
-    // update any listing field
+    removeListing: (state) => {
+      state.listing = null;
+    },
     updateListing: (state, action) => {
-      return { ...state, ...action.payload };
+      state.listing = { ...state.listing, ...action.payload };
     },
-
-    // reset listing when user finishes or cancels
-    resetListing: () => initialState,
   },
 });
 
-export const { updateField, loadListing,  updateListing, resetListing } = listingSlice.actions;
+export const { addListing, removeListing, updateListing, addUserListing } =
+  listingSlice.actions;
+
 export default listingSlice.reducer;

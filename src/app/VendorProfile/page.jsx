@@ -10,18 +10,23 @@ import { toast } from "react-toastify";
 
 import Header from "@/component/Header";
 
-import { setVendor } from "@/redux/slice/VendorSlice";
+import { setVendor, updateVendor } from "@/redux/slice/VendorSlice";
+import { addUserListing } from "@/redux/slice/ListingSlice";
 
 export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
   const { vendor } = useSelector((state) => state.vendor);
+  const { userListing } = useSelector((state) => state.listing);
 
+  console.log({ vendor });
   const [isFetching, setIsFetching] = useState(false);
+  const [gettingUserListing, setGettingUserListing] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+    if (vendor) return;
     const fetchVendorDetails = async () => {
       try {
         setIsFetching(true);
@@ -44,9 +49,34 @@ export default function Page() {
       }
     };
     fetchVendorDetails();
-  }, [user]);
+  }, [user, vendor]);
 
-  console.log({ vendor });
+  useEffect(() => {
+    if (vendor) {
+      setGettingUserListing(true);
+      const getUserListing = async () => {
+        const response = await fetch(
+          `/api/get-listing?email=${user._doc.email}`,
+          {
+            method: "GET",
+          },
+        );
+        const initData = await response.json();
+        if (!initData.success) {
+          toast.error(initData.message);
+          return;
+        }
+        const filteredListing = initData.data.filter(
+          (item) => item.email === user._doc.email,
+        );
+        toast.success(initData.message);
+        dispatch(addUserListing(filteredListing));
+        dispatch(updateVendor(filteredListing));
+        setGettingUserListing(false);
+      };
+      getUserListing();
+    }
+  }, []);
 
   const handleProceed = () => {
     router.push("/CreateListing");
@@ -58,9 +88,9 @@ export default function Page() {
         <Header />
       </div>
 
-      <div className="pt-24 p-6 md:p-12" style={{ paddingTop: "150px" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:mt-24">
-          <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+      <div className="pt-24 p-6 md:p-12" style={{ paddingTop: "130px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:mt-24">
+          <div className="bg-white rounded-3xl shadow-md overflow-hidden lg:col-span-4">
             <div className="relative h-40 w-full overflow-visible">
               <div className="absolute inset-0 z-0">
                 {vendor?.logo && (
@@ -122,11 +152,11 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-md flex flex-col justify-center items-center text-center p-10">
+          <div className="bg-white rounded-3xl shadow-md flex flex-col justify-center items-center text-center p-10 lg:col-span-8">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
               <Box size={36} className="text-gray-600" />
             </div>
-            {!isFetching ? (
+            {!gettingUserListing ? (
               <>
                 <h3 className="text-xl font-semibold mt-6">No listings yet</h3>
 

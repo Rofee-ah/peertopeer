@@ -100,23 +100,28 @@ const Header = () => {
               {openNavigation && (
                 <div className="absolute right-0 top-full z-50 mt-4 w-[300px] rounded-[32px] bg-white px-6 py-6 shadow-2xl ring-1 ring-black/5">
                   <nav className="flex flex-col space-y-4 text-gray-900 font-medium text-sm">
-                    {path !== "/VendorProfile" && (
-                      <Link
-                        href="/VendorProfile"
-                        onClick={() => setOpenNavigation(false)}
-                        className="hover:text-blue-600 transition"
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-
-                    <button
-                      // href="#"
-                      onClick={handleLogout}
-                      className="hover:text-blue-600 transition"
-                    >
-                      Logout
-                    </button>
+                    <ul>
+                      {path !== "/VendorProfile" && (
+                        <li className="py-2">
+                          <Link
+                            href="/VendorProfile"
+                            onClick={() => setOpenNavigation(false)}
+                            className="hover:text-blue-600 transition"
+                          >
+                            Dashboard
+                          </Link>
+                        </li>
+                      )}
+                      <li style={{ cursor: "pointer" }}>
+                        <button
+                          // href="#"
+                          onClick={handleLogout}
+                          className="hover:text-blue-600 transition"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
                   </nav>
                 </div>
               )}
