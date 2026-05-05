@@ -12,6 +12,7 @@ import Header from "@/component/Header";
 
 import { setVendor, updateVendor } from "@/redux/slice/VendorSlice";
 import { addUserListing } from "@/redux/slice/ListingSlice";
+import ProductListings from "@/component/ProductListings";
 
 export default function Page() {
   const router = useRouter();
@@ -153,17 +154,18 @@ export default function Page() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-md flex flex-col justify-center items-center text-center p-10 lg:col-span-8">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+            {/* <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
               <Box size={36} className="text-gray-600" />
-            </div>
+            </div> */}
             {!gettingUserListing ? (
               <>
-                <h3 className="text-xl font-semibold mt-6">No listings yet</h3>
+                {/* <h3 className="text-xl font-semibold mt-6">No listings yet</h3>
 
                 <p className="text-gray-500 mt-2 max-w-md">
                   Your business is set up and ready to go. Create your first
                   listing to start reaching students on campus.
-                </p>
+                </p> */}
+                <ProductListings />
               </>
             ) : (
               <>
