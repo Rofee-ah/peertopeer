@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Search, SlidersHorizontal, MapPin, Clock } from 'lucide-react';
 import Header from '@/component/Header';
+import CampusPicks from '@/component/CampusPicks';
 
 const categories = [
   'All items',
@@ -127,18 +128,20 @@ export default function Marketplace() {
           </div>
         </div>
 
+        <CampusPicks />
+
         {/* TABS */}
-        <div className='flex gap-3 mt-8 overflow-x-auto'>
+        {/* <div className='flex gap-3 mt-8 overflow-x-auto'>
           <button className='px-6 py-2 rounded-full bg-blue-200 font-medium'>
             Goods
           </button>
           <button className='px-6 py-2 rounded-full bg-gray-200 text-gray-600'>
             Services
           </button>
-        </div>
+        </div> */}
 
         {/* CATEGORY */}
-        <div className='flex gap-3 mt-5 overflow-x-auto'>
+        {/* <div className='flex gap-3 mt-5 overflow-x-auto'>
           {categories.map((cat, index) => (
             <button
               key={index}
@@ -150,10 +153,10 @@ export default function Marketplace() {
               {cat}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* GRID */}
-        <div className='grid gap-8 mt-10 sm:grid-cols-2 lg:grid-cols-3'>
+        {/* <div className='grid gap-8 mt-10 sm:grid-cols-2 lg:grid-cols-3'>
           {items.map((item) => (
             <div
               key={item.id}
@@ -203,10 +206,10 @@ export default function Marketplace() {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* VIEW MORE */}
-        <div className='mt-14 flex justify-center'>
+        {/* <div className='mt-14 flex justify-center'>
           <button className='rounded-full bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700 transition'>
             View More Listings
           </button>

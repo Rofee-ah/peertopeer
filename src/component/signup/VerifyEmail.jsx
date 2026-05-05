@@ -46,20 +46,24 @@ export const VerifyEmail = () => {
   const goBack = () => {
     dispatch(removeAccount());
   };
+  useEffect(() => {
+    if (otp.length === 3) {
+      const verifyAccountToken = async () => {
+        const response = await fetch(`/api/token-verify?email=${account.email}`, {
+          method: "GET",
+        });
+        const initData = await response.json();
+        setRegisteredToken(initData);
+      };
+      verifyAccountToken();
+    }
+  }, [otp])
 
   const handleSubmit = () => {
     if (otp === "" || otp.length !== 6) {
       return toast.error("invalid otp");
     }
-    const verifyAccountToken = async () => {
-      const response = await fetch(`/api/token-verify?email=${account.email}`, {
-        method: "GET",
-      });
-      const initData = await response.json();
-      setRegisteredToken(initData.token);
-    };
-    verifyAccountToken();
-    if (+registeredToken === +otp) {
+    if (registeredToken && registeredToken.includes(otp)) {
       dispatch(
         addAccount({
           verified: true,

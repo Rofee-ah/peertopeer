@@ -8,13 +8,17 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const email = searchParams.get("email");
   try {
-    const latestEntry = await Token.findOne({ email }).sort({ _id: -1 }).exec();
+    const latestEntries = await Token.find({ email })
+      .sort({ _id: -1 })
+      .limit(2)
+      .exec();
 
-    if (!latestEntry) {
+    if (latestEntries.length < 2) {
       return NextResponse.json({ message: "No entry found" }, { status: 404 });
     }
 
-    return NextResponse.json(latestEntry, { status: 200 });
+    const data = latestEntries.map((entry) => entry.token)
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("API Error", error);
     return NextResponse.json(

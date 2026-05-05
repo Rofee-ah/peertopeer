@@ -2,31 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, ChevronDown, Plus, MoreHorizontal, Eye, Edit2, CheckCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
 
-const listings = [
-  {
-    id: 1,
-    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&h=100&fit=crop', // Headphone image
-    title: 'Sony WH-1000XM5 Wireless...',
-    category: 'Goods • Gadgets',
-    price: '₦25,000',
-    status: 'Active',
-    views: 0,
-  },
-  {
-    id: 2,
-    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100&h=100&fit=crop', // Tomatoes image
-    title: 'Fresh Vegetable Tomatoes',
-    category: 'Goods • Fresh Foods',
-    price: '₦4,000',
-    status: 'Sold',
-    views: 12,
-  }
-];
+import { formatNaira } from '@/lib/utils';
+import ListingDetailsSidebar from './ListingDetailsSidebar';
+import DeleteListingModal from './DeleteListingModal';
 
 export const ProductListings = () => {
-  const {vendor} = useSelector((state) => state.vendor);
+  const router = useRouter();
+  const { vendor } = useSelector((state) => state.vendor);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [viewListing, setViewListing] = useState(null);
+  const [deleteListing, setDeleteListing] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -44,7 +32,20 @@ export const ProductListings = () => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  console.log({vendor})
+  const filteredListings = (vendor?.listing || []).filter((item) => {
+    if (!searchQuery) return true;
+    try {
+      const regex = new RegExp(searchQuery, 'i');
+      return regex.test(item.title) || regex.test(item.category) || regex.test(item.price);
+    } catch (e) {
+      // Fallback to basic string search if regex is invalid (e.g. while typing '[')
+      return (
+        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+  });
+
   return (
     <div className="bg-white rounded-[2rem] p-4 md:p-8 w-full">
       <div className="mb-6">
@@ -58,9 +59,11 @@ export const ProductListings = () => {
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Search size={16} className="text-gray-400" />
             </div>
-            <input 
-              type="text" 
-              placeholder="Search listings..." 
+            <input
+              type="text"
+              placeholder="Search listings (supports regex)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-full w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm"
             />
           </div>
@@ -69,7 +72,7 @@ export const ProductListings = () => {
             <ChevronDown size={16} className="text-gray-500" />
           </button>
         </div>
-        <button className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors w-full sm:w-auto justify-center">
+        <button className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors w-full sm:w-auto justify-center" onClick={() => router.push("/CreateListing")}>
           <Plus size={18} />
           Create Listing
         </button>
@@ -87,8 +90,9 @@ export const ProductListings = () => {
             </tr>
           </thead>
           <tbody>
-            {vendor?.listing.map((item, index) => (
-              <tr key={item._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+            {filteredListings.length > 0 ? (
+              filteredListings.map((item, index) => (
+                <tr key={item._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                 <td className="py-5 px-5">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden relative">
@@ -101,12 +105,11 @@ export const ProductListings = () => {
                   </div>
                 </td>
                 <td className="py-5 px-5 text-sm font-bold text-gray-900">
-                  {item.price}
+                  {formatNaira(item.price)}
                 </td>
                 <td className="py-5 px-5 text-center">
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold ${
-                    item.status === 'Active' ? 'bg-[#e6f0ff] text-blue-600' : 'bg-[#e6ffe6] text-green-600'
-                  }`}>
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold ${item.status === 'Active' ? 'bg-[#e6f0ff] text-blue-600' : 'bg-[#e6ffe6] text-green-600'
+                    }`}>
                     {item.status || 'N/A'}
                   </span>
                 </td>
@@ -116,19 +119,25 @@ export const ProductListings = () => {
                   </span>
                 </td>
                 <td className="py-5 px-5 text-center relative">
-                  <button 
+                  <button
                     onClick={(e) => toggleDropdown(item._id, e)}
                     className="p-2 border border-gray-200 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors inline-flex items-center justify-center focus:outline-none"
                   >
                     <MoreHorizontal size={18} />
                   </button>
-                  
+
                   {openDropdownId === item._id && (
-                    <div 
+                    <div
                       ref={dropdownRef}
                       className="absolute right-5 top-12 mt-2 w-40 bg-white rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 py-2 z-50 text-left"
                     >
-                      <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                      <button
+                        onClick={() => {
+                          setViewListing(item);
+                          setOpenDropdownId(null);
+                        }}
+                        className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                      >
                         <Eye size={16} className="text-gray-500" />
                         View
                       </button>
@@ -140,7 +149,13 @@ export const ProductListings = () => {
                         <CheckCircle size={16} />
                         Mark as sold
                       </button>
-                      <button className="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors">
+                      <button
+                        onClick={() => {
+                          setDeleteListing(item);
+                          setOpenDropdownId(null);
+                        }}
+                        className="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                      >
                         <Trash2 size={16} />
                         Delete
                       </button>
@@ -148,14 +163,38 @@ export const ProductListings = () => {
                   )}
                 </td>
               </tr>
-            ))}
+            ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="py-8 text-center text-gray-500">
+                  No listings found matching "{searchQuery}"
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="mt-6 pt-6 border-t border-gray-100">
-        <p className="text-xs text-gray-400">Showing 1-{vendor?.listing.length} of {vendor?.listing.length}</p>
+        <p className="text-xs text-gray-400">Showing {filteredListings.length > 0 ? 1 : 0}-{filteredListings.length} of {vendor?.listing?.length || 0}</p>
       </div>
+
+      <ListingDetailsSidebar
+        isOpen={!!viewListing}
+        onClose={() => setViewListing(null)}
+        listing={viewListing}
+      />
+
+      <DeleteListingModal
+        isOpen={!!deleteListing}
+        onClose={() => setDeleteListing(null)}
+        listing={deleteListing}
+        onDelete={(listing) => {
+          // Placeholder for delete logic
+          console.log("Delete listing:", listing._id);
+          setDeleteListing(null);
+        }}
+      />
     </div>
   );
 };
