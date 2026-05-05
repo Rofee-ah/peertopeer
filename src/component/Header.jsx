@@ -37,6 +37,7 @@ const Header = () => {
     router.push("/");
   };
 
+  console.log({ vendor, user })
   return (
     <div className="bg-[#f9fbff]">
       {/* HEADER */}
@@ -101,7 +102,7 @@ const Header = () => {
                 <div className="absolute right-0 top-full z-50 mt-4 w-[300px] rounded-[32px] bg-white px-6 py-6 shadow-2xl ring-1 ring-black/5">
                   <nav className="flex flex-col space-y-4 text-gray-900 font-medium text-sm">
                     <ul>
-                      {path !== "/VendorProfile" && (
+                      {user._doc.isVendor && path !== "/VendorProfile" && (
                         <li className="py-2">
                           <Link
                             href="/VendorProfile"
@@ -155,11 +156,10 @@ const Header = () => {
 
       <div
         className={`fixed top-0 left-0 w-full z-50 px-4 pt-24 transition-all duration-200 ease-out
-        ${
-          open
+        ${open
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-10 pointer-events-none"
-        }`}
+          }`}
       >
         <div className="bg-white rounded-[32px] shadow-2xl px-6 py-8 relative md:hidden">
           <button

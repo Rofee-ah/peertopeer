@@ -90,8 +90,8 @@ export default function Page() {
       </div>
 
       <div className="pt-24 p-6 md:p-12" style={{ paddingTop: "130px" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:mt-24">
-          <div className="bg-white rounded-3xl shadow-md overflow-hidden lg:col-span-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:mt-24 items-start">
+          <div className="bg-white rounded-3xl shadow-md overflow-hidden lg:col-span-4 h-fit">
             <div className="relative h-40 w-full overflow-visible">
               <div className="absolute inset-0 z-0">
                 {vendor?.logo && (
@@ -153,19 +153,23 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-md flex flex-col justify-center items-center text-center p-10 lg:col-span-8">
-            {/* <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
-              <Box size={36} className="text-gray-600" />
-            </div> */}
+          <div className="flex flex-col lg:col-span-8">
             {!gettingUserListing ? (
               <>
-                {/* <h3 className="text-xl font-semibold mt-6">No listings yet</h3>
-
-                <p className="text-gray-500 mt-2 max-w-md">
-                  Your business is set up and ready to go. Create your first
-                  listing to start reaching students on campus.
-                </p> */}
-                <ProductListings />
+                {vendor?.listing?.length > 0 ? (
+                  <ProductListings />
+                ) : (
+                  <div className="bg-white rounded-3xl shadow-md flex flex-col justify-center items-center text-center p-10 w-full h-full">
+                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+                      <Box size={36} className="text-gray-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold mt-6">No listings yet</h3>
+                    <p className="text-gray-500 mt-2 max-w-md">
+                      Your business is set up and ready to go. Create your first
+                      listing to start reaching students on campus.
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
               <>

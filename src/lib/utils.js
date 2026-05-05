@@ -42,3 +42,9 @@ export const getInitials = (firstValue, secondValue) => {
   const secondInitial = secondValue.slice(0, 1);
   return `${firstInitial} ${secondInitial}`;
 };
+
+export const formatNaira = (amount) => {
+  const number = Number(amount);
+  if (isNaN(number)) return amount;
+  return `₦${number.toLocaleString('en-US')}`;
+};
