@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addProduct } from '@/redux/slice/productSlice';
+import { formatNaira, calculateDaysRemaining } from '@/lib/utils';
 
 const goodsCategories = [
   'All items',
@@ -106,9 +107,20 @@ export default function CampusPicks() {
   const [activeCategory, setActiveCategory] = useState('All items');
 
   const dispatch = useDispatch();
+  const { productItems } = useSelector((state) => state.product)
+
   useEffect(() => {
-    dispatch(addProduct(items));
-  }, []);
+    const fetchProducts = async () => {
+      const response = await fetch('/api/get-listing');
+      const data = await response.json();
+      dispatch(addProduct(data.data));
+    }
+    fetchProducts()
+  }, [])
+
+  // useEffect(() => {
+  //   dispatch(addProduct(items));
+  // }, []);
 
   // useEffect(() => {
   //   setActiveCategory('All items');
@@ -117,8 +129,8 @@ export default function CampusPicks() {
   const categories =
     activeType === 'Goods' ? goodsCategories : servicesCategories;
 
-  const filteredItems = items.filter((item) => {
-    const matchType = item.type === activeType;
+  const filteredItems = (productItems || items).filter((item) => {
+    const matchType = item.category === activeType;
     const matchCategory =
       activeCategory === 'All items' || item.category === activeCategory;
     return matchType && matchCategory;
@@ -134,11 +146,10 @@ export default function CampusPicks() {
               <button
                 key={type}
                 onClick={() => setActiveType(type)}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition ${
-                  activeType === type
-                    ? 'bg-blue-200 text-gray-900'
-                    : 'text-gray-500 hover:text-gray-800'
-                }`}>
+                className={`rounded-full px-6 py-2 text-sm font-medium transition ${activeType === type
+                  ? 'bg-blue-200 text-gray-900'
+                  : 'text-gray-500 hover:text-gray-800'
+                  }`}>
                 {type}
               </button>
             ))}
@@ -151,11 +162,10 @@ export default function CampusPicks() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
-                activeCategory === cat
-                  ? 'bg-blue-200 text-gray-900'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}>
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${activeCategory === cat
+                ? 'bg-blue-200 text-gray-900'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}>
               {cat}
             </button>
           ))}
@@ -169,64 +179,66 @@ export default function CampusPicks() {
 
         {/* Grid */}
         <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
-          {filteredItems.map((item) => (
+          {filteredItems.length > 0 ? filteredItems.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className='overflow-hidden rounded-2xl bg-white shadow-md'>
-              <Link href={`/product/${item.id}`}>
+              <Link href={`/product/${item._id}`}>
                 <div className='relative h-64 w-full bg-gray-100'>
                   {item.image && (
                     <Image
-                      src={item.image}
+                      src={item.image[0]}
                       alt={item.title}
                       fill
                       className='object-contain'
                     />
                   )}
                 </div>
-                {console.log({ item })}
 
                 {/* Content */}
                 <div className='space-y-4 p-5'>
                   <h3 className='text-xl font-bold text-gray-900'>
-                    {item.title}
+                    {item?.title}
                   </h3>
 
                   <span className='inline-block rounded-full bg-blue-100 px-4 py-1 text-sm font-medium text-blue-700'>
-                    {item.category}
+                    {item?.category}
                   </span>
 
                   <div className='flex items-center gap-2 text-gray-600'>
-                    📍 <span>{item.location}</span>
+                    📍 <span>{item?.location}</span>
                   </div>
 
                   <div className='flex items-center gap-2 text-gray-600'>
-                    ⏳ <span>{item.time}</span>
+                    ⏳ <span>{calculateDaysRemaining(item.createdAt, item.listing_duration)} days left</span>
                   </div>
 
                   <p className='text-2xl font-bold text-blue-700'>
-                    {item.price}
+                    {formatNaira(item?.price)}
                   </p>
 
                   <hr />
 
                   <div className='flex items-center gap-3'>
                     <div className='flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700'>
-                      {item.seller.charAt(0)}
+                      {item?.seller.charAt(0)}
                     </div>
                     <span className='font-semibold text-gray-800'>
-                      {item.seller}
+                      {item?.seller}
                     </span>
                   </div>
                 </div>
               </Link>
             </div>
-          ))}
+          )) : <div className='col-span-full flex justify-center items-center h-[300px]'>
+            <h2 className='text-2xl mt-5 font-bold text-gray-900'>No listings found</h2>
+          </div>
+          }
         </div>
 
         {/* Button */}
         <div className='mt-14 flex justify-center'>
-          <button className='rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700'>
+          <button disabled={filteredItems.length === 0} className='rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700'>
             View More Listings
           </button>
         </div>

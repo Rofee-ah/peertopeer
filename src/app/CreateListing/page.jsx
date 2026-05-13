@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { validateText } from "@/lib/utils";
+import { validateText, categories } from "@/lib/utils";
 import { addListing } from "@/redux/slice/ListingSlice";
 // import { updateField, loadListing } from '@/redux/slice/ListingSlice';
 
@@ -15,11 +15,13 @@ const variables = {
   description: "",
   price: "",
 };
+
 export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [form, setForm] = useState(variables);
+  const { listing } = useSelector((state) => state.listing);
+  const [form, setForm] = useState(listing || variables);
   const [errors, setErrors] = useState(variables);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,10 +105,12 @@ export default function Page() {
               onChange={(e) => handleChange(e.target.value, "category")}
               className="w-full bg-[#f7f8fb] rounded-xl px-5 py-4 outline-none shadow-sm"
             >
-              <option disabled>Select...</option>
-              <option>Goods</option>
-              <option>Services</option>
-              <option>Both</option>
+              <option value="">Select...</option>
+              {Object.keys(categories).map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
             </select>
             {errors && errors.category && (
               <div className="flex items-center gap-2 text-sm text-red-500 mt-2">
@@ -125,13 +129,14 @@ export default function Page() {
               onChange={(e) => handleChange(e.target.value, "subCategory")}
               className="w-full bg-[#f7f8fb] rounded-xl px-5 py-4 outline-none shadow-sm"
             >
-              <option disabled>Select...</option>
-              <option>Fresh Foods</option>
-              <option>Electronics</option>
-              <option>Clothing</option>
-              <option>Books</option>
-              <option>Jewellery</option>
-              <option>Snacks</option>
+              <option disabled value=''>Select...</option>
+              {categories[form.category || 'Goods'].map((subCategory) => (
+                <option key={subCategory} value={subCategory}>
+                  {subCategory}
+                </option>
+
+              ))}
+
             </select>
             {errors && errors.subCategory && (
               <div className="flex items-center gap-2 text-sm text-red-500 mt-2">

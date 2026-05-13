@@ -21,7 +21,6 @@ export default function Page() {
   const { vendor } = useSelector((state) => state.vendor);
   const { userListing } = useSelector((state) => state.listing);
 
-  console.log({ vendor });
   const [isFetching, setIsFetching] = useState(false);
   const [gettingUserListing, setGettingUserListing] = useState(false);
 
@@ -126,7 +125,7 @@ export default function Page() {
                   <div className="flex justify-center gap-4 mt-6 flex-wrap">
                     <button className="flex items-center gap-2 bg-blue-100 text-blue-700 px-5 py-2 rounded-full">
                       <Package size={16} />
-                      {vendor?.listing.length || 0} Listings
+                      {vendor?.listing?.length || 0} Listings
                     </button>
 
                     <button className="flex items-center gap-2 bg-teal-200 text-gray-800 px-5 py-2 rounded-full">

@@ -1,19 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, ChevronDown, Plus, MoreHorizontal, Eye, Edit2, CheckCircle, Trash2 } from 'lucide-react';
 import Image from 'next/image';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
+import { toast } from "react-toastify";
+import { setVendor } from "@/redux/slice/VendorSlice";
 
 import { formatNaira } from '@/lib/utils';
 import ListingDetailsSidebar from './ListingDetailsSidebar';
 import DeleteListingModal from './DeleteListingModal';
+import { EditListingModal } from './EditListingModal';
+import { MarkListingSold } from './MarkListingSold';
 
 export const ProductListings = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { vendor } = useSelector((state) => state.vendor);
+  const { userListing } = useSelector((state) => state.listing);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [viewListing, setViewListing] = useState(null);
+  const [editListing, setEditListing] = useState(null);
+  const [markListing, setMarkListing] = useState(null);
   const [deleteListing, setDeleteListing] = useState(null);
+  const [triggerReload, setTriggerReload] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
 
@@ -32,7 +41,7 @@ export const ProductListings = () => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const filteredListings = (vendor?.listing || []).filter((item) => {
+  const filteredListings = (vendor?.listing || userListing).filter((item) => {
     if (!searchQuery) return true;
     try {
       const regex = new RegExp(searchQuery, 'i');
@@ -45,6 +54,58 @@ export const ProductListings = () => {
       );
     }
   });
+
+  useEffect(() => {
+    if (!triggerReload) return;
+    window.location.reload();
+    setTriggerReload(false);
+    // const getUserListing = async () => {
+    //   const response = await fetch(
+    //     `/api/get-listing?email=${vendor.email}`,
+    //     {
+    //       method: "GET",
+    //     },
+    //   );
+    //   const initData = await response.json();
+    //   const filteredListing = initData.data.filter(
+    //     (item) => item.email === vendor.email,
+    //   );
+    //   dispatch(setVendor(filteredListing));
+    //   setTriggerReload(false);
+    // };
+    // getUserListing();
+  }, [triggerReload]);
+
+  const updateListing = async (entity) => {
+    const response = await fetch("/api/publish-listing", {
+      method: "PUT",
+      body: JSON.stringify(entity),
+    });
+    const initData = await response.json();
+    if (!initData.success) {
+      toast.error(initData.message);
+      return;
+    }
+    toast.success(initData.message);
+    setEditListing(null);
+    setTriggerReload(!triggerReload);
+  };
+
+  const handleDeleteListing = async (entity) => {
+    const response = await fetch("/api/publish-listing", {
+      method: "DELETE",
+      body: JSON.stringify(entity),
+    });
+    const initData = await response.json();
+    if (!initData.success) {
+      toast.error(initData.message);
+      return;
+    }
+    toast.success(initData.message);
+    setDeleteListing(null);
+    setTriggerReload(!triggerReload);
+  };
+
 
   return (
     <div className="bg-white rounded-[2rem] p-4 md:p-8 w-full">
@@ -93,77 +154,87 @@ export const ProductListings = () => {
             {filteredListings.length > 0 ? (
               filteredListings.map((item, index) => (
                 <tr key={item._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
-                <td className="py-5 px-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden relative">
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  <td className="py-5 px-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                        <img src={item?.image[0]} alt={item.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
+                        <p className="text-xs text-gray-500 mt-1">{item.category}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">{item.category}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-5 px-5 text-sm font-bold text-gray-900">
-                  {formatNaira(item.price)}
-                </td>
-                <td className="py-5 px-5 text-center">
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold ${item.status === 'Active' ? 'bg-[#e6f0ff] text-blue-600' : 'bg-[#e6ffe6] text-green-600'
-                    }`}>
-                    {item.status || 'N/A'}
-                  </span>
-                </td>
-                <td className="py-5 px-5 text-center">
-                  <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1.5 rounded-full text-xs font-semibold bg-[#e6ffff] text-teal-600">
-                    {item.views || 'N/A'}
-                  </span>
-                </td>
-                <td className="py-5 px-5 text-center relative">
-                  <button
-                    onClick={(e) => toggleDropdown(item._id, e)}
-                    className="p-2 border border-gray-200 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors inline-flex items-center justify-center focus:outline-none"
-                  >
-                    <MoreHorizontal size={18} />
-                  </button>
-
-                  {openDropdownId === item._id && (
-                    <div
-                      ref={dropdownRef}
-                      className="absolute right-5 top-12 mt-2 w-40 bg-white rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 py-2 z-50 text-left"
+                  </td>
+                  <td className="py-5 px-5 text-sm font-bold text-gray-900">
+                    {formatNaira(item.price)}
+                  </td>
+                  <td className="py-5 px-5 text-center">
+                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold ${item.status === 'active' ? 'bg-[#e6f0ff] text-blue-600' : 'bg-[#e6ffe6] text-green-600'
+                      }`}>
+                      {item.status || 'N/A'}
+                    </span>
+                  </td>
+                  <td className="py-5 px-5 text-center">
+                    <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2.5 py-1.5 rounded-full text-xs font-semibold bg-[#e6ffff] text-teal-600">
+                      {item.count || '0'}
+                    </span>
+                  </td>
+                  <td className="py-5 px-5 text-center relative">
+                    <button
+                      onClick={(e) => toggleDropdown(item._id, e)}
+                      className="p-2 border border-gray-200 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors inline-flex items-center justify-center focus:outline-none"
                     >
-                      <button
-                        onClick={() => {
-                          setViewListing(item);
-                          setOpenDropdownId(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                      <MoreHorizontal size={18} />
+                    </button>
+
+                    {openDropdownId === item._id && (
+                      <div
+                        ref={dropdownRef}
+                        className="absolute right-5 top-12 mt-2 w-40 bg-white rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 py-2 z-50 text-left"
                       >
-                        <Eye size={16} className="text-gray-500" />
-                        View
-                      </button>
-                      <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                        <Edit2 size={16} className="text-gray-500" />
-                        Edit
-                      </button>
-                      <button className="w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors">
-                        <CheckCircle size={16} />
-                        Mark as sold
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDeleteListing(item);
-                          setOpenDropdownId(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))
+                        <button
+                          onClick={() => {
+                            setViewListing(item);
+                            setOpenDropdownId(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <Eye size={16} className="text-gray-500" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditListing(item);
+                            setOpenDropdownId(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                          <Edit2 size={16} className="text-gray-500" />
+                          Edit
+                        </button>
+                        {item.status !== 'sold' && (
+                          <button onClick={() => {
+                            setMarkListing(item)
+                            setOpenDropdownId(null)
+                          }} className="w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors">
+                            <CheckCircle size={16} />
+                            Mark as sold
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setDeleteListing(item);
+                            setOpenDropdownId(null);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan="5" className="py-8 text-center text-gray-500">
@@ -190,9 +261,26 @@ export const ProductListings = () => {
         onClose={() => setDeleteListing(null)}
         listing={deleteListing}
         onDelete={(listing) => {
-          // Placeholder for delete logic
-          console.log("Delete listing:", listing._id);
-          setDeleteListing(null);
+          handleDeleteListing(listing)
+        }}
+      />
+
+      <EditListingModal
+        isOpen={!!editListing}
+        onClose={() => setEditListing(null)}
+        listing={editListing}
+        onSave={(entity) => {
+          // Handle save logic here
+          updateListing(entity)
+        }}
+      />
+
+      <MarkListingSold
+        isOpen={!!markListing}
+        onClose={() => setMarkListing(null)}
+        listing={markListing}
+        onMarkAsSold={(listing) => {
+          updateListing(listing)
         }}
       />
     </div>
