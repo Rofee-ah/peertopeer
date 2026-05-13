@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import VendorsContact from '@/component/VendorsContact';
+import ContactVendorModal from '@/component/ContactVendorModal';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -19,45 +19,79 @@ import {
 } from 'lucide-react';
 
 import Header from '@/component/Header';
+import { formatNaira, calculateDaysRemaining } from '@/lib/utils';
 
 export default function Page() {
   const param = useParams();
   const { productItems } = useSelector((state) => state.product);
 
-  const [entity, setEntity] = useState([]);
-  const [selectedEntity, setSelectedEntity] = useState(null);
+  const [entity, setEntity] = useState();
   const [showVendor, setShowVendor] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    if (productItems.length > 0) {
-      const filterEntity = productItems.filter((item) => item.id === +param.id);
-      setEntity(filterEntity);
+    if (param.id && !entity) {
+      const getProducts = async () => {
+        const response = await fetch(`/api/get-single-listing?id=${param.id}`);
+        const initData = await response.json();
+        if (initData.success) {
+          setEntity(initData.data);
+        }
+      }
+      getProducts();
     }
-  }, [productItems, param.id]);
+  }, [param.id])
 
   useEffect(() => {
-    if (entity.length > 0) {
-      setSelectedEntity(entity[0]);
+    if (entity) {
+      const updateViewsCount = async () => {
+        await fetch(`/api/update-views-count`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: param.id,
+            count: (entity.count || 0) + 1,
+          }),
+        });
+      }
+      updateViewsCount();
     }
-  }, [entity]);
+  }, [entity])
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === entity.image.length - 1 ? 0 : prevIndex + 1
+    );
+  };
 
   return (
     <>
       <div className='bg-[#f9fbff]'>
-        {showVendor && selectedEntity && (
-          <VendorsContact
-            seller={selectedEntity}
+        {showVendor && entity && (
+          <ContactVendorModal
+            seller={entity}
+            isContact
             onClose={() => setShowVendor(false)}
+          />
+        )}
+
+        {showProfile && entity && (
+          <ContactVendorModal
+            seller={entity}
+            onClose={() => setShowProfile(false)}
           />
         )}
 
         <Header />
 
-        {selectedEntity && (
+        {entity && (
           <div className='min-h-screen bg-[#f4f6fb] p-6 md:p-20 pt-32 md:pt-50'>
             <p className='flex items-center text-sm md:text-base'>
-              <Link href='/'>Home</Link> / {selectedEntity.category} /{' '}
-              {selectedEntity.title}
+              <Link href='/'>Home</Link> / {entity.category} /{' '}
+              {entity.title}
             </p>
 
             <div className='flex items-center gap-2 text-gray-600 cursor-pointer mb-6 pt-6 md:pt-10'>
@@ -74,41 +108,44 @@ export default function Page() {
               {/* LEFT SIDE */}
               <div>
                 <h1 className='text-2xl md:text-4xl font-bold mb-3'>
-                  {selectedEntity.title}
+                  {entity.title}
                 </h1>
 
                 <div className='flex flex-wrap gap-4 md:gap-6 text-gray-500 mb-6 text-sm md:text-base'>
                   <div className='flex items-center gap-2'>
                     <Clock size={16} />
-                    Posted 2 DAYS
+                    {new Date(entity.createdAt).toDateString()}
                   </div>
 
                   <div className='flex items-center gap-2'>
                     <Clock size={16} />
-                    Expires on {selectedEntity.time}
+                    {calculateDaysRemaining(entity.createdAt, entity.listing_duration)} days left
                   </div>
                 </div>
 
                 {/* MAIN IMAGE */}
                 <div className='bg-white rounded-2xl p-6 md:p-20 flex justify-center items-center shadow-inner w-full md:w-[900px]'>
                   <img
-                    src={selectedEntity.image}
-                    alt={selectedEntity.title}
+                    src={entity.image[currentImageIndex]}
+                    alt={entity.title}
                     className='w-[250px] md:w-[500px] h-[250px] md:h-[400px] object-contain drop-shadow-xl'
                   />
-                   <div className='flex items-center gap-10 w-[50px] h-[40px] bg-white rounded-full shadow-inner ml-2 md:ml-50'>
-                    < ArrowRight size={20} className='ml-4 text-blue-700' />
-                  </div>
+                  {entity.image.length > 1 && (
+                    <div className='flex items-center gap-10 w-[50px] h-[40px] bg-white rounded-full shadow-inner ml-2 md:ml-50'>
+                      < ArrowRight size={20} onClick={handleNextImage} className='ml-4 text-blue-700' />
+                    </div>
+                  )}
                 </div>
 
                 {/* THUMBNAILS */}
                 <div className='flex gap-4 mt-6 overflow-x-auto'>
-                  {[1, 2, 3].map((item) => (
+                  {entity.image.map((item, index) => (
                     <img
-                      key={item}
-                      src={selectedEntity.image}
-                      alt=''
-                      className='w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover shadow-md'
+                      key={index}
+                      src={item}
+                      alt={entity.title}
+                      className={`w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover shadow-md ${currentImageIndex === index ? 'border-2 border-blue-500' : ''}`}
+                      onClick={() => setCurrentImageIndex(index)}
                     />
                   ))}
                 </div>
@@ -123,7 +160,7 @@ export default function Page() {
                     </h2>
 
                     <p className='text-gray-600 text-base md:text-lg leading-relaxed max-w-4xl'>
-                      DESCRIPTION
+                      {entity?.description}
                     </p>
 
                     <div className='mt-6 bg-blue-100 text-blue-800 rounded-2xl px-6 py-4 flex items-start md:items-center gap-3 w-full md:w-[600px]'>
@@ -142,14 +179,14 @@ export default function Page() {
                   <div className='bg-white rounded-3xl shadow-lg p-6 md:p-9 flex flex-col md:flex-row md:justify-between md:items-center gap-6 w-full md:w-[900px]'>
                     <div className='flex items-center gap-6'>
                       <div className='w-14 h-14 md:w-16 md:h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl md:text-2xl font-bold'>
-                        {selectedEntity.seller?.slice(0, 1)}
+                        {entity.seller?.slice(0, 1)}
                       </div>
 
                       <div>
                         <p className='text-xl md:text-2xl font-bold'>Vendor</p>
 
                         <h3 className='text-2xl md:text-3xl font-bold'>
-                          {selectedEntity.seller}
+                          {entity.seller}
                         </h3>
 
                         <div className='flex flex-wrap gap-4 md:gap-6 text-gray-500 mt-2 text-sm md:text-base'>
@@ -160,14 +197,14 @@ export default function Page() {
 
                           <div className='flex items-center gap-2'>
                             <MapPin size={18} />
-                            {selectedEntity.location}
+                            {entity.location}
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => setShowVendor(true)}
+                      onClick={() => setShowProfile(true)}
                       className='bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-full text-base md:text-lg font-semibold transition w-full md:w-auto'>
                       View Vendor Profile
                     </button>
@@ -181,7 +218,7 @@ export default function Page() {
                 <div className='bg-white rounded-3xl shadow-xl overflow-hidden w-full md:w-[500px]'>
                   <div className='bg-gradient-to-r from-gray-900 to-black text-white p-6 md:p-8'>
                     <h2 className='text-3xl md:text-4xl font-bold'>
-                      ₦{selectedEntity.price}
+                      {formatNaira(entity.price)}
                     </h2>
 
                     <p className='text-gray-300 mt-1'>Verified Listing Price</p>
@@ -192,7 +229,7 @@ export default function Page() {
                       <Clock className='text-blue-500' />
                       <div>
                         <p className='font-semibold'>Expiration</p>
-                        <p className='text-gray-500 text-sm'>Auto-expires</p>
+                        <p className='text-gray-500 text-sm'>Auto-expires in {calculateDaysRemaining(entity.createdAt, entity.listing_duration)} {calculateDaysRemaining(entity.createdAt, entity.listing_duration) == 1 ? 'day' : 'days'}</p>
                       </div>
                     </div>
 

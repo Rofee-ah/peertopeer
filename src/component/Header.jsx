@@ -20,6 +20,12 @@ const Header = () => {
   const { width } = useWindowSize();
   const [open, setOpen] = useState(false);
   const [openNavigation, setOpenNavigation] = useState(false);
+  const [isVendor, setIsVendor] = useState(false);
+
+  useEffect(() => {
+    const checkIsVendor = user?._doc?.email === vendor?.email
+    setIsVendor(checkIsVendor)
+  }, [vendor])
 
   // Prevent background scrolling when menu opens
   useEffect(() => {
@@ -37,7 +43,6 @@ const Header = () => {
     router.push("/");
   };
 
-  console.log({ vendor, user })
   return (
     <div className="bg-[#f9fbff]">
       {/* HEADER */}
@@ -102,7 +107,7 @@ const Header = () => {
                 <div className="absolute right-0 top-full z-50 mt-4 w-[300px] rounded-[32px] bg-white px-6 py-6 shadow-2xl ring-1 ring-black/5">
                   <nav className="flex flex-col space-y-4 text-gray-900 font-medium text-sm">
                     <ul>
-                      {user._doc.isVendor && path !== "/VendorProfile" && (
+                      {(isVendor || user._doc.isVendor) && path !== "/VendorProfile" && (
                         <li className="py-2">
                           <Link
                             href="/VendorProfile"

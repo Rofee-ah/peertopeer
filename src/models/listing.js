@@ -13,6 +13,14 @@ const ListingSchema = new Schema({
     type: String,
     required: true,
   },
+  seller: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
   sub_category: {
     type: String,
     required: true,
@@ -20,6 +28,9 @@ const ListingSchema = new Schema({
   price: {
     type: String,
     required: true,
+  },
+  count: {
+    type: Number,
   },
   listing_duration: {
     type: String,
@@ -29,6 +40,11 @@ const ListingSchema = new Schema({
     required: true,
   },
   image: [String],
+  status: {
+    type: String,
+    enum: ['active', 'sold', 'expired'],
+    default: 'active',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

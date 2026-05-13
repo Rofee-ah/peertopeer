@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 
-import { validateText } from "@/lib/utils";
+import { validateText, categories, validateEmail } from "@/lib/utils";
 import { isVendor } from "@/redux/slice/UserSlice";
 
 const variables = {
@@ -111,7 +111,7 @@ export default function VendorDetails() {
   };
 
   const validateFields = (field) => ({
-    universityEmail: validateText(
+    universityEmail: validateEmail(
       field.universityEmail || "",
       "University Email",
     ),
@@ -231,7 +231,7 @@ export default function VendorDetails() {
               <option value="" disabled>
                 Select...
               </option>
-              {primaryOptions.map((item, index) => (
+              {Object.keys(categories).map((item, index) => (
                 <option key={index} value={item}>
                   {item}
                 </option>
@@ -357,9 +357,8 @@ export default function VendorDetails() {
             disabled={!agree}
             onClick={handleSubmit}
             className={`w-full py-4 rounded-full text-white font-semibold transition
-    ${
-      agree ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
-    }`}
+    ${agree ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
+              }`}
           >
             {!loading ? (
               "Complete Setup"

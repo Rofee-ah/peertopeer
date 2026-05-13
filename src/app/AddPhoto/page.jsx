@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Upload, X, Home } from "lucide-react";
+import { Upload, X, Home, PlusCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -13,8 +13,9 @@ export default function Page() {
   const dispatch = useDispatch();
   const router = useRouter();
 
+  const { listing } = useSelector((state) => state.listing);
   const [image, setImage] = useState();
-  const [uploadUri, setUploadUri] = useState();
+  const [uploadUri, setUploadUri] = useState(listing?.image || []);
   const [savingImage, setSavingImage] = useState(false);
   const [imageError, setImagError] = useState();
 
@@ -58,11 +59,12 @@ export default function Page() {
         }
         const data = await uploadResponse.json();
         const transformUrl = transformImageUrl(data.secure_url, 728, 666);
-        setUploadUri(transformUrl);
+        setUploadUri((prev) => [...prev, transformUrl]);
       } catch (error) {
         console.error(error);
       } finally {
         setSavingImage(false);
+        setImage(undefined)
       }
     };
     saveImage();
@@ -75,7 +77,7 @@ export default function Page() {
   }, [uploadUri]);
 
   const handleProceed = () => {
-    if (!uploadUri) {
+    if (uploadUri.length == 0) {
       setImagError("Product Image is required");
       return;
     }
@@ -109,7 +111,7 @@ export default function Page() {
         <label className="flex flex-col items-center justify-center w-full h-44 md:h-48 border border-dashed border-gray-300 rounded-2xl cursor-pointer hover:bg-gray-50 transition text-center">
           {!savingImage ? (
             <>
-              {!uploadUri && (
+              {uploadUri.length === 0 && (
                 <>
                   <Upload className="w-7 h-7 text-gray-500 mb-3" />
 
@@ -120,6 +122,14 @@ export default function Page() {
                   <span className="text-gray-400 text-xs md:text-sm mt-1">
                     PNG, JPG or WEBP (Max 5MB each)
                   </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    id="file"
+                    onChange={handleFile}
+                    className="hidden"
+                  />
                 </>
               )}
             </>
@@ -127,24 +137,35 @@ export default function Page() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-t-transparent"></div>
           )}
 
-          {!uploadUri ? (
-            <input
-              type="file"
-              accept="image/*"
-              name="image"
-              id="file"
-              onChange={handleFile}
-              className="hidden"
-            />
-          ) : (
-            <div className="rounded-full">
-              <Image
-                src={uploadUri}
-                width={150}
-                height={150}
-                alt="logo"
-                className="rounded-2xl"
-              />
+          {uploadUri.length > 0 && (
+            <div className="flex align-center items-center justify-center gap-4">
+              <div className="flex gap-4 rounded-full">
+                {uploadUri.map((uri, index) => (
+                  <Image
+                    src={uri}
+                    key={index}
+                    width={150}
+                    height={150}
+                    alt="logo"
+                    className="rounded-2xl border border-black/25"
+                  />
+                ))}
+              </div>
+              <label
+                htmlFor="file"
+                className="cursor-pointer hover:opacity-80 transition-opacity inline-block"
+              >
+                <PlusCircle className="w-12 h-12 text-blue-600" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  name="image"
+                  id="file"
+                  onChange={handleFile}
+                  className="hidden"
+                />
+              </label>
+
             </div>
           )}
         </label>

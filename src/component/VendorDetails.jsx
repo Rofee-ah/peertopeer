@@ -190,9 +190,8 @@ export default function VendorDetails() {
               router.push('/VendorCompleteRegistration');
             }}
             className={`w-full py-4 rounded-full text-white font-semibold transition
-    ${
-      agree ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'
-    }`}>
+    ${agree ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'
+              }`}>
             Complete Setup
           </button>
         </div>

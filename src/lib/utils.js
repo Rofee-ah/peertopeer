@@ -12,7 +12,6 @@ export const validateEmail = (text, fieldName) => {
     return `${fieldName || ""} is required`;
   }
   if (!text.includes("@stu.ui.edu.ng") && !text.includes("@dlc.ui.edu.ng")) {
-    console.log(text);
     return "Email must include @dlc.ui.edu.ng or @stu.ui.edu.ng";
   }
   return null;
@@ -48,3 +47,29 @@ export const formatNaira = (amount) => {
   if (isNaN(number)) return amount;
   return `₦${number.toLocaleString('en-US')}`;
 };
+
+export const categories = {
+  "Goods": ["Books", "Clothing", "Jewellery", "Snacks"],
+  "Services": ["Furniture", "Electronics"],
+}
+
+export const calculateDaysRemaining = (createdAtStr, durationDays) => {
+    const createdDate = new Date(createdAtStr);
+    
+    // 1. Calculate the expiration timestamp (Created Date + Duration in Days)
+    const expirationDate = new Date(createdDate.getTime());
+    expirationDate.setDate(expirationDate.getDate() + Number(durationDays));
+    
+    // 2. Get the current time right now
+    const now = new Date();
+    
+    // 3. Find the difference in milliseconds
+    const differenceInMs = expirationDate - now;
+    
+    // 4. Convert milliseconds to full days (rounded down)
+    const daysRemaining = Math.floor(differenceInMs / (1000 * 60 * 60 * 24));
+    
+    // 5. Return 0 if expired, otherwise return the days remaining
+    return daysRemaining < 0 ? 0 : daysRemaining;
+};
+

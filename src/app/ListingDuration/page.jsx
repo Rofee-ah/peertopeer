@@ -10,8 +10,9 @@ export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [useCustom, setUseCustom] = useState(false);
-  const [duration, setDuration] = useState();
+  const { listing } = useSelector((state) => state.listing);
+  const [useCustom, setUseCustom] = useState(listing?.duration === '30' ? false : true);
+  const [duration, setDuration] = useState(listing?.duration);
   const [error, setError] = useState();
 
   const handleNext = () => {
@@ -63,11 +64,10 @@ export default function Page() {
             <button
               onClick={() => setDuration("30")}
               className={`flex-1 py-3 rounded-full font-medium border transition
-              ${
-                !useCustom
+              ${!useCustom
                   ? "bg-blue-700 text-white"
                   : "bg-white border-gray-300 hover:bg-gray-50"
-              }`}
+                }`}
             >
               No (Use Default 30 Days)
             </button>
@@ -76,11 +76,10 @@ export default function Page() {
             <button
               onClick={() => setUseCustom(true)}
               className={`flex-1 py-3 rounded-full font-medium transition
-              ${
-                useCustom
+              ${useCustom
                   ? "bg-blue-700 text-white"
                   : "border border-gray-300 hover:bg-gray-50"
-              }`}
+                }`}
             >
               Yes, Custom Duration
             </button>

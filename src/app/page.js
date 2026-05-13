@@ -32,7 +32,7 @@ export default function Home() {
         );
         const initData = await response.json();
         if (!initData.success) return;
-        toast.success("Vendor Details Fetched successfully");
+        // toast.success("Vendor Details Fetched successfully");
         dispatch(setVendor(initData.data));
       } catch (error) {
         console.error(error);

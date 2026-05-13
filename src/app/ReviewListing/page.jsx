@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Home, Info } from "lucide-react";
+import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -13,6 +14,7 @@ export default function Page() {
 
   const { listing } = useSelector((state) => state.listing);
   const { user } = useSelector((state) => state.user);
+  const { vendor } = useSelector((state) => state.vendor);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [entity, setEntity] = useState();
@@ -23,12 +25,13 @@ export default function Page() {
 
   useEffect(() => {
     if (entity) return;
-    setEntity({ ...listing, email: user._doc.email });
+    setEntity({ ...listing, email: user._doc.email, seller: vendor?.businessName, location: vendor?.department });
   }, []);
 
   useEffect(() => {
     if (!isSubmitting) return;
     const publishListing = async () => {
+
       const response = await fetch("/api/publish-listing", {
         method: "POST",
         body: JSON.stringify(entity),
@@ -142,11 +145,16 @@ export default function Page() {
 
             {listing?.image && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <img
-                  src={listing?.image || ""}
-                  alt="listing"
-                  className="w-full h-28 sm:h-32 object-cover rounded-xl"
-                />
+                {listing?.image?.map((uri, index) => (
+                  <Image
+                    src={uri}
+                    key={index}
+                    width={150}
+                    height={150}
+                    alt="logo"
+                    className="rounded-2xl border border-black/25"
+                  />
+                ))}
               </div>
             )}
           </div>
